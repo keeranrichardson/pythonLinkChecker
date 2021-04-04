@@ -53,5 +53,15 @@ link = WebPage(baseUrl)
 link.findLinks()
 link.getStatusCodes()
         
+'''
+todos:
 
+- follow links in site
+- handle 30x redirections
+- treat the url list as a queue to allow restarting
+- check for missing images
+- check for errors in metadata links
+- better reporting
+- passing url in as parameter
+'''
 
