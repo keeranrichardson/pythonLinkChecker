@@ -32,10 +32,7 @@ class WebPage:
             print("about to check "+fullUrl)
 
             print(Url(fullUrl).getStatus(), fullUrl)
-            
-
-   
-
+        
 class Url:
     def __init__(self, url):
         self.url = url
