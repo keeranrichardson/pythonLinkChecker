@@ -11,7 +11,7 @@ class WebPage:
     def findLinks(self):
         self.statusCode = Url(self.url).getStatus()
         if self.statusCode != 200:
-            print("can't find the links for "+ self.url+ " because status code = "+ self.statusCode)
+            print("can't find the links for "+ self.url+ " because status code = "+ str(self.statusCode))
 
         self.urlsFound = []
         self.html = requests.get(self.url).text
@@ -22,16 +22,22 @@ class WebPage:
             if href is not None:
                 self.urlsFound.append(href)
                 print(href)
+        
 
     def makeFullUrl(self, base, end):
         return urljoin(base, end)
 
     def getStatusCodes(self):
+        for fullUrl in self.getFullUrls():
+            print("about to check "+fullUrl)
+            print(Url(fullUrl).getStatus(), fullUrl)
+
+    def getFullUrls(self):
+        fullUrls = []
         for aUrl in self.urlsFound:
             fullUrl = self.makeFullUrl(self.url, aUrl)
-            print("about to check "+fullUrl)
-
-            print(Url(fullUrl).getStatus(), fullUrl)
+            fullUrls.append(fullUrl)
+        return fullUrls
         
 class Url:
     def __init__(self, url):
@@ -47,18 +53,71 @@ class Url:
             print("error reading "+ self.url)
             return -1
         
+class UrlQueue:
+    def __init__(self, urlsFound):
+        self.urlsToFollow = []
+        self.urlsToFollow.extend(urlsFound)
+
+    def isEmpty(self):
+        return (len(self.urlsToFollow) == 0)
+
+    def getNextLink(self):
+        return self.urlsToFollow.pop(0)
+
+    def addToQueue(self, listOfUrls):
+        self.urlsToFollow.extend(listOfUrls)
+
+
+
+class Scanner:
+    def __init__(self, url):
+        self.baseUrl = url
+        self.queueToScan = UrlQueue([])
+
+    def addWebPageLinksToQueue(self, aLink):
+        page = WebPage(aLink)    
+        page.findLinks()
+        self.queueToScan.addToQueue(page.getFullUrls())
+
+
+    def scan(self):
+        if self.queueToScan.isEmpty():
+            self.addWebPageLinksToQueue(self.baseUrl)
+        
+        while not self.queueToScan.isEmpty():
+            link = self.queueToScan.getNextLink()
+            print("about to check "+link)
+
+            aUrl = Url(link)
+            statusCode  = aUrl.getStatus()
+            print(statusCode, link)
+
+            if statusCode == 200:
+                self.addWebPageLinksToQueue(link)
+
+
+queueOfUrls = UrlQueue([])
+
 print(Url(baseUrl).getStatus())
 
-link = WebPage(baseUrl)
-link.findLinks()
-link.getStatusCodes()
-        
+#link = WebPage(baseUrl)
+#link.findLinks()
+#link.getStatusCodes()
+
+scanner = Scanner(baseUrl) 
+scanner.scan()      
+
+
 '''
 todos:
 
-- follow links in site
+- [x] follow links in site
+- configure whether to follow external links or not
+- doesnt follow duplicate links
+- add a list of followed links
 - handle 30x redirections
-- treat the url list as a queue to allow restarting
+- [x] treat the url list as a queue
+- allow restarting
 - check for missing images
 - check for errors in metadata links
 - better reporting
