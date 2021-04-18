@@ -124,7 +124,11 @@ def listPageLinks():
    
     return render_template('urlList.html', title="linkchecker", urls = fullUrls)
         
+if __name__ == '__main__':
+    # Threaded option to enable multiple instances for multiple user access support
+    app.run(threaded=True, port=5000)
 
+    
 '''
 todos:
 
