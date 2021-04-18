@@ -1,6 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urljoin
+from flask import Flask
+from flask import render_template
+from flask import request
+
 
 baseUrl="http://keeranrichardson.com/"
 
@@ -104,9 +108,22 @@ print(Url(baseUrl).getStatus())
 #link.findLinks()
 #link.getStatusCodes()
 
-scanner = Scanner(baseUrl) 
-scanner.scan()      
+#scanner = Scanner(baseUrl) 
+#scanner.scan()      
 
+app = Flask(__name__)
+
+@app.route('/')
+def listPageLinks():
+    baseUrl = request.args.get('url', '')
+    if baseUrl == "":
+        return "add a url parameter"
+    link = WebPage(baseUrl)
+    link.findLinks()
+    fullUrls = link.getFullUrls() 
+   
+    return render_template('urlList.html', title="linkchecker", urls = fullUrls)
+        
 
 '''
 todos:
