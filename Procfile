@@ -1,1 +1,1 @@
-web: gunicorn app:linkChecker
+web: gunicorn linkChecker:app
